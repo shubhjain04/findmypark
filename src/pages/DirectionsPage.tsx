@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TabBar from '@/components/TabBar';
 import { ArrowLeft, Navigation2, Clock, Car, Bike, PersonStanding } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -170,8 +170,8 @@ const DirectionsPage = () => {
         <div className="bg-park-teal-light rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <h2 className="font-medium text-park-teal-dark">{directions.destination}</h2>
-              <p className="text-sm text-gray-600">from {directions.currentLocation}</p>
+              <h2 className="font-medium text-park-teal-dark">{directionsData.destination}</h2>
+              <p className="text-sm text-gray-600">from {directionsData.currentLocation}</p>
             </div>
             <div className="flex items-center">
               <Clock size={16} className="text-park-teal mr-1" />
@@ -181,7 +181,7 @@ const DirectionsPage = () => {
           
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center">
-              <div className="text-gray-600">Distance: {directions.distance}</div>
+              <div className="text-gray-600">Distance: {directionsData.distance}</div>
             </div>
             <div className="bg-park-teal text-white px-3 py-1 rounded-full text-xs">
               23 spaces available
@@ -195,7 +195,7 @@ const DirectionsPage = () => {
         <h3 className="text-sm font-medium text-gray-500 mb-2">Turn-by-turn directions</h3>
         
         <div className="space-y-3">
-          {directions.steps.map((step, index) => (
+          {directionsData.steps.map((step, index) => (
             <motion.div 
               key={step.id}
               className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm"
