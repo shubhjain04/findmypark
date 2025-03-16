@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import TabBar from '@/components/TabBar';
-import { ArrowLeft, Navigation2, Clock, CarTaxi, Bike, PersonStanding } from 'lucide-react';
+import { ArrowLeft, Navigation2, Clock, Car, Bike, PersonStanding } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -79,7 +79,7 @@ const DirectionsPage = () => {
             whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedMode('car')}
           >
-            <CarTaxi size={18} className="mr-2" />
+            <Car size={18} className="mr-2" />
             <span className="text-sm font-medium">Drive</span>
           </motion.button>
           

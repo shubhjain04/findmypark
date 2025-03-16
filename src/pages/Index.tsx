@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import MapView from '@/components/MapView';
 import TabBar from '@/components/TabBar';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Index = () => {
