@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -10,16 +9,21 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   const handleSearch = () => {
     if (query.trim()) {
-      onSearch(query);
+      onSearch(query); // Trigger the search in the parent component (MapView)
+      // Add the query to recent searches if it's not already there
+      if (!recentSearches.includes(query)) {
+        setRecentSearches((prev) => [query, ...prev].slice(0, 4)); // Keep only the last 4 searches
+      }
     }
   };
 
   const clearSearch = () => {
     setQuery('');
-    onSearch('');
+    onSearch(''); // Clear the search results in the parent component
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,7 +54,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Enter any building name"
+          placeholder="Search for parking lots or buildings"
           className="w-full py-3 pl-10 pr-10 text-sm border-none rounded-full focus:outline-none bg-transparent"
         />
         
@@ -79,7 +83,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           exit={{ opacity: 0, y: -10 }}
         >
           <div className="text-xs font-medium text-gray-500 mb-2 px-2">Recent Searches</div>
-          {['MacKinnon Hall', 'Glass Bowl Stadium', 'Student Union', 'Engineering Building'].map((item, index) => (
+          {recentSearches.map((item, index) => (
             <div 
               key={index}
               className="flex items-center px-2 py-2 hover:bg-gray-50 rounded-lg cursor-pointer"
