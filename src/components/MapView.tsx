@@ -122,7 +122,7 @@ const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     if (mapRef.current && !mapInstance.current) {
       try {
-        const map = new google.maps.Map(mapRef.current, {
+        const map = new window.google.maps.Map(mapRef.current, {
           center: {
             lat: 41.6563,
             lng: -83.6127
@@ -134,7 +134,7 @@ const MapView: React.FC<MapViewProps> = ({
         setMapLoaded(true);
 
         // Search for parking lots when the map is initialized
-        searchParkingLots(map.getCenter() || new google.maps.LatLng(41.6563, -83.6127));
+        searchParkingLots(map.getCenter() || new window.google.maps.LatLng(41.6563, -83.6127));
       } catch (error) {
         console.error("Error initializing Google Maps:", error);
         setApiError(true);
@@ -156,16 +156,16 @@ const MapView: React.FC<MapViewProps> = ({
         query: searchQuery || 'parking lot'
       };
       
-      const service = new google.maps.places.PlacesService(mapInstance.current);
+      const service = new window.google.maps.places.PlacesService(mapInstance.current);
       service.textSearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
           // Clear existing markers
           markersRef.current.forEach(marker => marker.setMap(null));
           markersRef.current = [];
 
           // Add new markers for parking lots
           const newMarkers = results.map(place => {
-            const marker = new google.maps.Marker({
+            const marker = new window.google.maps.Marker({
               position: place.geometry?.location,
               map: mapInstance.current,
               title: place.name
