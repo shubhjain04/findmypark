@@ -4,13 +4,25 @@ import TabBar from '@/components/TabBar';
 import { ArrowLeft, Navigation2, Clock, Car, Bike, PersonStanding } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { GoogleMap, LoadScript, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%'
+};
+
+const center = {
+  lat: 41.6564,
+  lng: -83.6109
+};
 
 const DirectionsPage = () => {
   const navigate = useNavigate();
   const [selectedMode, setSelectedMode] = useState<'car' | 'bike' | 'walk'>('car');
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   
   // Mock data for directions
-  const directions = {
+  const directionsData = {
     destination: 'Lot 13N - Student Parking',
     currentLocation: 'Your Location',
     distance: '0.3 miles',
@@ -32,6 +44,26 @@ const DirectionsPage = () => {
     }
   };
 
+  const getTravelMode = () => {
+    switch (selectedMode) {
+      case 'car': return google.maps.TravelMode.DRIVING;
+      case 'bike': return google.maps.TravelMode.BICYCLING;
+      case 'walk': return google.maps.TravelMode.WALKING;
+      default: return google.maps.TravelMode.DRIVING;
+    }
+  };
+
+  const directionsCallback = (
+    result: google.maps.DirectionsResult | null,
+    status: google.maps.DirectionsStatus
+  ) => {
+    if (status === google.maps.DirectionsStatus.OK) {
+      setDirections(result);
+    } else {
+      console.error(`Error fetching directions: ${status}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white pb-16">
       {/* Header */}
@@ -46,15 +78,41 @@ const DirectionsPage = () => {
       </div>
 
       {/* Map Preview */}
-      <div 
-        className="h-40 bg-gray-100 w-full"
-        style={{
-          backgroundImage: `url(${'/lovable-uploads/4d63b1ce-b51f-4667-a5bb-5ec00805fd6f.png'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        <div className="flex justify-center h-full items-center">
+      <div className="h-40 w-full relative">
+        <LoadScript googleMapsApiKey="AIzaSyBHH8XkyThoJi9K5d7zGpUaxn-lEq1oSwU">
+          <GoogleMap
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            center={center}
+            zoom={15}
+            options={{
+              fullscreenControl: false,
+              streetViewControl: false,
+              mapTypeControl: false,
+              zoomControl: false,
+            }}
+          >
+            {/* Request directions when the travel mode changes */}
+            <DirectionsService
+              options={{
+                destination: { lat: 41.6563, lng: -83.6127 }, // Lot 13N
+                origin: { lat: 41.6600, lng: -83.6150 },      // Example origin
+                travelMode: getTravelMode(),
+              }}
+              callback={directionsCallback}
+            />
+            
+            {/* Render directions on the map */}
+            {directions && (
+              <DirectionsRenderer
+                options={{
+                  directions: directions,
+                  suppressMarkers: true,
+                }}
+              />
+            )}
+          </GoogleMap>
+        </LoadScript>
+        <div className="flex justify-center absolute top-0 left-0 right-0 bottom-0 items-center pointer-events-none">
           <motion.div 
             className="bg-white/70 backdrop-blur-md p-3 rounded-lg shadow-sm"
             initial={{ opacity: 0, y: 20 }}
