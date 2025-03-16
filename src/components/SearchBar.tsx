@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Search, MapPin, X } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -9,7 +10,11 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([
+    "Lot 13N",
+    "Engineering Building",
+    "Student Union"
+  ]);
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -53,7 +58,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 100)}
           placeholder="Search for parking lots or buildings"
           className="w-full py-3 pl-10 pr-10 text-sm border-none rounded-full focus:outline-none bg-transparent"
         />
@@ -75,31 +80,40 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         </button>
       </div>
       
-      {isFocused && (
-        <motion.div 
-          className="absolute w-full mt-2 p-2 bg-white rounded-xl shadow-md border border-gray-100 z-10"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-        >
-          <div className="text-xs font-medium text-gray-500 mb-2 px-2">Recent Searches</div>
-          {recentSearches.map((item, index) => (
-            <div 
-              key={index}
-              className="flex items-center px-2 py-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-              onClick={() => {
-                setQuery(item);
-                handleSearch();
-              }}
-            >
-              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3">
-                <MapPin size={14} className="text-gray-500" />
+      <AnimatePresence>
+        {isFocused && (
+          <motion.div 
+            className="absolute w-full mt-2 p-2 bg-white rounded-xl shadow-md border border-gray-100 z-10"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <div className="text-xs font-medium text-gray-500 mb-2 px-2">Recent Searches</div>
+            {recentSearches.length > 0 ? (
+              recentSearches.map((item, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center px-2 py-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  onClick={() => {
+                    setQuery(item);
+                    onSearch(item);
+                    setIsFocused(false);
+                  }}
+                >
+                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                    <MapPin size={14} className="text-gray-500" />
+                  </div>
+                  <div className="text-sm text-gray-800">{item}</div>
+                </div>
+              ))
+            ) : (
+              <div className="px-2 py-3 text-sm text-gray-500 text-center">
+                No recent searches
               </div>
-              <div className="text-sm text-gray-800">{item}</div>
-            </div>
-          ))}
-        </motion.div>
-      )}
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
