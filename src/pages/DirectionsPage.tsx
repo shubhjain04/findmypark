@@ -20,6 +20,7 @@ const DirectionsPage = () => {
   const navigate = useNavigate();
   const [selectedMode, setSelectedMode] = useState<'car' | 'bike' | 'walk'>('car');
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   
   // Mock data for directions
   const directionsData = {
@@ -79,38 +80,44 @@ const DirectionsPage = () => {
 
       {/* Map Preview */}
       <div className="h-40 w-full relative">
-        <LoadScript googleMapsApiKey="AIzaSyBHH8XkyThoJi9K5d7zGpUaxn-lEq1oSwU">
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '100%' }}
-            center={center}
-            zoom={15}
-            options={{
-              fullscreenControl: false,
-              streetViewControl: false,
-              mapTypeControl: false,
-              zoomControl: false,
-            }}
-          >
-            {/* Request directions when the travel mode changes */}
-            <DirectionsService
+        <LoadScript 
+          googleMapsApiKey="AIzaSyBHH8XkyThoJi9K5d7zGpUaxn-lEq1oSwU"
+          onLoad={() => setIsLoaded(true)}
+          loadingElement={<div className="h-full w-full flex items-center justify-center bg-gray-100">Loading map...</div>}
+        >
+          {isLoaded && (
+            <GoogleMap
+              mapContainerStyle={{ width: '100%', height: '100%' }}
+              center={center}
+              zoom={15}
               options={{
-                destination: { lat: 41.6563, lng: -83.6127 }, // Lot 13N
-                origin: { lat: 41.6600, lng: -83.6150 },      // Example origin
-                travelMode: getTravelMode(),
+                fullscreenControl: false,
+                streetViewControl: false,
+                mapTypeControl: false,
+                zoomControl: false,
               }}
-              callback={directionsCallback}
-            />
-            
-            {/* Render directions on the map */}
-            {directions && (
-              <DirectionsRenderer
+            >
+              {/* Only request directions when the map is loaded */}
+              <DirectionsService
                 options={{
-                  directions: directions,
-                  suppressMarkers: true,
+                  destination: { lat: 41.6563, lng: -83.6127 }, // Lot 13N
+                  origin: { lat: 41.6600, lng: -83.6150 },      // Example origin
+                  travelMode: getTravelMode(),
                 }}
+                callback={directionsCallback}
               />
-            )}
-          </GoogleMap>
+              
+              {/* Only render directions if they exist */}
+              {directions && (
+                <DirectionsRenderer
+                  options={{
+                    directions: directions,
+                    suppressMarkers: true,
+                  }}
+                />
+              )}
+            </GoogleMap>
+          )}
         </LoadScript>
         <div className="flex justify-center absolute top-0 left-0 right-0 bottom-0 items-center pointer-events-none">
           <motion.div 
