@@ -4,8 +4,6 @@ import TabBar from '@/components/TabBar';
 import { ArrowLeft, Navigation2, Clock, Car, Bike, PersonStanding } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { toast } from "sonner";
-import { Button } from '@/components/ui/button';
 
 const DirectionsPage = () => {
   const navigate = useNavigate();
@@ -32,20 +30,6 @@ const DirectionsPage = () => {
       case 'walk': return '15 min';
       default: return '5 min';
     }
-  };
-
-  const handleStartNavigation = () => {
-    toast.success("Navigation started", {
-      description: `Turn-by-turn directions to ${directions.destination}`,
-    });
-    
-    // In a real app, this would start the turn-by-turn navigation
-    // For this demo, we'll just display a toast notification
-    setTimeout(() => {
-      toast.info("First direction", {
-        description: directions.steps[0].instruction,
-      });
-    }, 2000);
   };
 
   return (
@@ -178,13 +162,10 @@ const DirectionsPage = () => {
         </div>
         
         <div className="mt-4 p-4">
-          <Button 
-            className="w-full bg-park-teal hover:bg-park-teal-dark text-white"
-            onClick={handleStartNavigation}
-          >
+          <button className="btn-teal w-full">
             <Navigation2 size={16} className="mr-2" />
             Start Navigation
-          </Button>
+          </button>
         </div>
       </div>
 

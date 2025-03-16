@@ -42,7 +42,7 @@ const ParkingLot: React.FC<ParkingLotProps> = ({ lot, onSelect, isSelected }) =>
       >
         <div 
           className={`w-10 h-10 rounded-full flex items-center justify-center 
-            ${isAvailable ? 'bg-park-teal text-white' : 'bg-red-500 text-white'}`}
+            ${isAvailable ? 'bg-park-teal text-white' : 'bg-park-occupied text-white'}`}
         >
           <motion.div
             animate={{ scale: isAvailable ? [1, 1.1, 1] : 1 }}
@@ -79,7 +79,7 @@ const ParkingLot: React.FC<ParkingLotProps> = ({ lot, onSelect, isSelected }) =>
             
             <div className="h-1.5 w-full bg-gray-100 rounded-full mb-2">
               <motion.div 
-                className={`h-full rounded-full ${isAvailable ? 'bg-park-teal' : 'bg-red-500'}`}
+                className={`h-full rounded-full ${isAvailable ? 'bg-park-available' : 'bg-park-occupied'}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${availability * 100}%` }}
                 transition={{ duration: 0.5 }}
