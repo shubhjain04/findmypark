@@ -4,56 +4,6 @@ import SearchBar from './SearchBar';
 import { MapPin, Navigation, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// Mock data for parking lots
-const mockParkingLots = [
-  {
-    id: 1,
-    name: 'Lot 13N',
-    location: { lat: 41.6563, lng: -83.6127 },
-    availableSpaces: 23,
-    totalSpaces: 45,
-    distance: '0.3 mi',
-    type: 'Student',
-    recentlyViewed: true,
-  },
-  {
-    id: 2,
-    name: 'Lot 16',
-    location: { lat: 41.6584, lng: -83.6105 },
-    availableSpaces: 8,
-    totalSpaces: 30,
-    distance: '0.5 mi',
-    type: 'Faculty',
-  },
-  {
-    id: 3,
-    name: 'Lot 17',
-    location: { lat: 41.6612, lng: -83.6089 },
-    availableSpaces: 0,
-    totalSpaces: 25,
-    distance: '0.7 mi',
-    type: 'Visitor',
-  },
-  {
-    id: 4,
-    name: 'Area 2',
-    location: { lat: 41.6598, lng: -83.6076 },
-    availableSpaces: 15,
-    totalSpaces: 40,
-    distance: '0.4 mi',
-    type: 'Student',
-  },
-  {
-    id: 5,
-    name: 'Area 3',
-    location: { lat: 41.6574, lng: -83.6053 },
-    availableSpaces: 12,
-    totalSpaces: 35,
-    distance: '0.6 mi',
-    type: 'Mixed',
-  },
-];
-
 interface MapViewProps {
   onSelectLot: (lot: any) => void;
 }
@@ -62,22 +12,24 @@ const MapView: React.FC<MapViewProps> = ({ onSelectLot }) => {
   const [selectedLot, setSelectedLot] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTooltip, setShowTooltip] = useState('');
+  const [parkingLots, setParkingLots] = useState<any[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   const handleSelectLot = (lot: any) => {
     setSelectedLot(lot);
     onSelectLot(lot);
-    // Center the map on the selected lot
     if (mapInstance.current) {
-      mapInstance.current.setCenter(lot.location);
+      mapInstance.current.setCenter(lot.geometry.location);
     }
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    // In a real app, this would filter parking lots or make an API call
-    console.log('Searching for:', query);
+    if (mapInstance.current) {
+      searchParkingLots(mapInstance.current.getCenter());
+    }
   };
 
   // Initialize Google Maps
@@ -86,21 +38,54 @@ const MapView: React.FC<MapViewProps> = ({ onSelectLot }) => {
       const map = new google.maps.Map(mapRef.current, {
         center: { lat: 41.6563, lng: -83.6127 }, // Default center
         zoom: 15,
-        mapId: 'YOUR_MAP_ID', // Optional: Add a custom map ID if you have one
       });
 
       mapInstance.current = map;
 
-      // Add markers for parking lots
-      mockParkingLots.forEach((lot) => {
-        new google.maps.Marker({
-          position: lot.location,
-          map: map,
-          title: lot.name,
-        });
-      });
+      // Search for parking lots when the map is initialized
+      searchParkingLots(map.getCenter());
     }
   }, []);
+
+  // Function to search for parking lots using the Places API
+  const searchParkingLots = (location: google.maps.LatLng) => {
+    if (!mapInstance.current) return;
+
+    const request = {
+      location: location,
+      radius: 1000, // Search within 1km radius
+      type: 'parking', // Search for parking lots
+      query: 'parking lot', // Optional: Explicitly search for parking lots
+    };
+
+    const service = new google.maps.places.PlacesService(mapInstance.current);
+    service.textSearch(request, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        // Clear existing markers
+        markersRef.current.forEach((marker) => marker.setMap(null));
+        markersRef.current = [];
+
+        // Add new markers for parking lots
+        const newMarkers = results.map((place) => {
+          const marker = new google.maps.Marker({
+            position: place.geometry?.location,
+            map: mapInstance.current,
+            title: place.name,
+          });
+
+          // Add click event to select the parking lot
+          marker.addListener('click', () => {
+            handleSelectLot(place);
+          });
+
+          return marker;
+        });
+
+        markersRef.current = newMarkers;
+        setParkingLots(results);
+      }
+    });
+  };
 
   return (
     <div className="relative h-full w-full overflow-hidden">
